@@ -56,9 +56,9 @@
 -w /etc/audisp/ -p wa -k audispconfig
 
 ## Monitor for use of audit management tools
--a always,exit -F exe=/sbin/auditctl -k audittools
--a always,exit -F exe=/sbin/auditd -k audittools
--a always,exit -F exe=/usr/sbin/augenrules -k audittools
+-w /sbin/auditctl -p x -k audittools
+-w /sbin/auditd -p x -k audittools
+-w /usr/sbin/augenrules -p x -k audittools
 
 # Filters ---------------------------------------------------------------------
 
@@ -140,8 +140,8 @@
 -w /etc/localtime -p wa -k localtime
 
 ## Stunnel
--a always,exit -F exe=/usr/sbin/stunnel -k stunnel
--a always,exit -F exe=/usr/bin/stunnel -k stunnel
+-w /usr/sbin/stunnel -p x -k stunnel
+-w /usr/bin/stunnel -p x -k stunnel
 
 ## Cron configuration & scheduled jobs
 -w /etc/cron.allow -p wa -k cron
@@ -166,16 +166,16 @@
 -w /etc/sudoers.d/ -p wa -k actions
 
 ## Passwd
--a always,exit -F exe=/usr/bin/passwd -k passwd_modification
+-w /usr/bin/passwd -p x -k passwd_modification
 
 ## Tools to change group identifiers
--a always,exit -F exe=/usr/sbin/groupadd -k group_modification
--a always,exit -F exe=/usr/sbin/groupmod -k group_modification
--a always,exit -F exe=/usr/sbin/addgroup -k group_modification
--a always,exit -F exe=/usr/sbin/useradd -k user_modification
--a always,exit -F exe=/usr/sbin/userdel -k user_modification
--a always,exit -F exe=/usr/sbin/usermod -k user_modification
--a always,exit -F exe=/usr/sbin/adduser -k user_modification
+-w /usr/sbin/groupadd -p x -k group_modification
+-w /usr/sbin/groupmod -p x -k group_modification
+-w /usr/sbin/addgroup -p x -k group_modification
+-w /usr/sbin/useradd -p x -k user_modification
+-w /usr/sbin/userdel -p x -k user_modification
+-w /usr/sbin/usermod -p x -k user_modification
+-w /usr/sbin/adduser -p x -k user_modification
 
 ## Login configuration and information
 -w /etc/login.defs -p wa -k login
@@ -188,6 +188,12 @@
 ### Changes to hostname
 -a always,exit -F arch=b32 -S sethostname -S setdomainname -k network_modifications
 -a always,exit -F arch=b64 -S sethostname -S setdomainname -k network_modifications
+## Successful IPv4 Connections
+-a always,exit -F arch=b64 -S connect -F a2=16 -F success=1 -F key=network_connect_4
+-a always,exit -F arch=b32 -S connect -F a2=16 -F success=1 -F key=network_connect_4
+## Successful IPv6 Connections
+-a always,exit -F arch=b64 -S connect -F a2=28 -F success=1 -F key=network_connect_6
+-a always,exit -F arch=b32 -S connect -F a2=28 -F success=1 -F key=network_connect_6
 ### Changes to other files
 -w /etc/hosts -p wa -k network_modifications
 -w /etc/sysconfig/network -p wa -k network_modifications
@@ -229,7 +235,7 @@
 -w /etc/ssh/sshd_config.d -k sshd
 
 # Systemd
--a always,exit -F exe=/bin/systemctl -k systemd
+-w /bin/systemctl -p x -k systemd
 -w /etc/systemd/ -p wa -k systemd
 
 ## SELinux events that modify the system's Mandatory Access Controls (MAC)
@@ -246,16 +252,16 @@
 -a always,exit -F arch=b64 -S open -F dir=/srv -F success=0 -k unauthedfileaccess
 
 ## Process ID change (switching accounts) applications
--a always,exit -F exe=/bin/su -k priv_esc
--a always,exit -F exe=/usr/bin/sudo -k priv_esc
+-w /bin/su -p x -k priv_esc
+-w /usr/bin/sudo -p x -k priv_esc
 -w /etc/sudoers -p rw -k priv_esc
 -w /etc/sudoers.d -p rw -k priv_esc
 
 ## Power state
--a always,exit -F exe=/sbin/shutdown -k power
--a always,exit -F exe=/sbin/poweroff -k power
--a always,exit -F exe=/sbin/reboot -k power
--a always,exit -F exe=/sbin/halt -k power
+-w /sbin/shutdown -p x -k power
+-w /sbin/poweroff -p x -k power
+-w /sbin/reboot -p x -k power
+-w /sbin/halt -p x -k power
 
 ## Session initiation information
 -w /var/run/utmp -p wa -k session
@@ -293,46 +299,46 @@
 # Special Rules ---------------------------------------------------------------
 
 ## Reconnaissance
--a always,exit -F exe=/usr/bin/whoami -k recon
--a always,exit -F exe=/usr/bin/id -k recon
--a always,exit -F exe=/bin/hostname -k recon
--a always,exit -F exe=/bin/uname -k recon
--a always,exit -F exe=/etc/issue -k recon
--a always,exit -F exe=/etc/hostname -k recon
+-w /usr/bin/whoami -p x -k recon
+-w /usr/bin/id -p x -k recon
+-w /bin/hostname -p x -k recon
+-w /bin/uname -p x -k recon
+-w /etc/issue -p r -k recon
+-w /etc/hostname -p r -k recon
 
 ## Suspicious activity
--a always,exit -F exe=/usr/bin/wget -k susp_activity
--a always,exit -F exe=/usr/bin/curl -k susp_activity
--a always,exit -F exe=/usr/bin/base64 -k susp_activity
--a always,exit -F exe=/bin/nc -k susp_activity
--a always,exit -F exe=/bin/netcat -k susp_activity
--a always,exit -F exe=/usr/bin/ncat -k susp_activity
--a always,exit -F exe=/usr/bin/ssh -k susp_activity
--a always,exit -F exe=/usr/bin/scp -k susp_activity
--a always,exit -F exe=/usr/bin/sftp -k susp_activity
--a always,exit -F exe=/usr/bin/ftp -k susp_activity
--a always,exit -F exe=/usr/bin/socat -k susp_activity
--a always,exit -F exe=/usr/bin/wireshark -k susp_activity
--a always,exit -F exe=/usr/bin/tshark -k susp_activity
--a always,exit -F exe=/usr/bin/rawshark -k susp_activity
--a always,exit -F exe=/usr/bin/rdesktop -k susp_activity
--a always,exit -F exe=/usr/bin/nmap -k susp_activity
+-w /usr/bin/wget -p x -k susp_activity
+-w /usr/bin/curl -p x -k susp_activity
+-w /usr/bin/base64 -p x -k susp_activity
+-w /bin/nc -p x -k susp_activity
+-w /bin/netcat -p x -k susp_activity
+-w /usr/bin/ncat -p x -k susp_activity
+-w /usr/bin/ssh -p x -k susp_activity
+-w /usr/bin/scp -p x -k susp_activity
+-w /usr/bin/sftp -p x -k susp_activity
+-w /usr/bin/ftp -p x -k susp_activity
+-w /usr/bin/socat -p x -k susp_activity
+-w /usr/bin/wireshark -p x -k susp_activity
+-w /usr/bin/tshark -p x -k susp_activity
+-w /usr/bin/rawshark -p x -k susp_activity
+-w /usr/bin/rdesktop -p x -k susp_activity
+-w /usr/bin/nmap -p x -k susp_activity
 
 ## Added to catch netcat on Ubuntu
--a always,exit -F exe=/bin/nc.openbsd -k susp_activity
--a always,exit -F exe=/bin/nc.traditional -k susp_activity
+-w /bin/nc.openbsd -p x -k susp_activity
+-w /bin/nc.traditional -p x -k susp_activity
 
 ## Sbin suspicious activity
--a always,exit -F exe=/sbin/iptables -k sbin_susp
--a always,exit -F exe=/sbin/ip6tables -k sbin_susp
--a always,exit -F exe=/sbin/ifconfig -k sbin_susp
--a always,exit -F exe=/usr/sbin/arptables -k sbin_susp
--a always,exit -F exe=/usr/sbin/ebtables -k sbin_susp
--a always,exit -F exe=/sbin/xtables-nft-multi -k sbin_susp
--a always,exit -F exe=/usr/sbin/nft -k sbin_susp
--a always,exit -F exe=/usr/sbin/tcpdump -k sbin_susp
--a always,exit -F exe=/usr/sbin/traceroute -k sbin_susp
--a always,exit -F exe=/usr/sbin/ufw -k sbin_susp
+-w /sbin/iptables -p x -k sbin_susp
+-w /sbin/ip6tables -p x -k sbin_susp
+-w /sbin/ifconfig -p x -k sbin_susp
+-w /usr/sbin/arptables -p x -k sbin_susp
+-w /usr/sbin/ebtables -p x -k sbin_susp
+-w /sbin/xtables-nft-multi -p x -k sbin_susp
+-w /usr/sbin/nft -p x -k sbin_susp
+-w /usr/sbin/tcpdump -p x -k sbin_susp
+-w /usr/sbin/traceroute -p x -k sbin_susp
+-w /usr/sbin/ufw -p x -k sbin_susp
 
 ## Injection
 ### These rules watch for code injection by the ptrace facility.
@@ -353,30 +359,30 @@
 # Software Management ---------------------------------------------------------
 
 # RPM (Redhat/CentOS)
--a always,exit -F exe=/usr/bin/rpm -k software_mgmt
--a always,exit -F exe=/usr/bin/yum -k software_mgmt
+-w /usr/bin/rpm -p x -k software_mgmt
+-w /usr/bin/yum -p x -k software_mgmt
 
 # DNF (Fedora/RedHat 8/CentOS 8)
--a always,exit -F exe=/usr/bin/dnf -k software_mgmt
+-w /usr/bin/dnf -p x -k software_mgmt
 
 # YAST/Zypper/RPM (SuSE)
--a always,exit -F exe=/sbin/yast -k software_mgmt
--a always,exit -F exe=/sbin/yast2 -k software_mgmt
--a always,exit -F exe=/bin/rpm -k software_mgmt
--a always,exit -F exe=/usr/bin/zypper -k software_mgmt
+-w /sbin/yast -p x -k software_mgmt
+-w /sbin/yast2 -p x -k software_mgmt
+-w /bin/rpm -p x -k software_mgmt
+-w /usr/bin/zypper -k software_mgmt
 
 # DPKG / APT-GET (Debian/Ubuntu)
--a always,exit -F exe=/usr/bin/dpkg -k software_mgmt
--a always,exit -F exe=/usr/bin/apt -k software_mgmt
--a always,exit -F exe=/usr/bin/apt-add-repository -k software_mgmt
--a always,exit -F exe=/usr/bin/apt-get -k software_mgmt
--a always,exit -F exe=/usr/bin/aptitude -k software_mgmt
--a always,exit -F exe=/usr/bin/wajig -k software_mgmt
--a always,exit -F exe=/usr/bin/snap -k software_mgmt
+-w /usr/bin/dpkg -p x -k software_mgmt
+-w /usr/bin/apt -p x -k software_mgmt
+-w /usr/bin/apt-add-repository -p x -k software_mgmt
+-w /usr/bin/apt-get -p x -k software_mgmt
+-w /usr/bin/aptitude -p x -k software_mgmt
+-w /usr/bin/wajig -p x -k software_mgmt
+-w /usr/bin/snap -p x -k software_mgmt
 
 # PIP (Python installs)
--a always,exit -F exe=/usr/bin/pip -k software_mgmt
--a always,exit -F exe=/usr/bin/pip3 -k software_mgmt
+-w /usr/bin/pip -p x -k software_mgmt
+-w /usr/bin/pip3 -p x -k software_mgmt
 
 # Special Software ------------------------------------------------------------
 
@@ -391,18 +397,18 @@
 -w /etc/chef -p wa -k soft_chef
 
 ### Docker
--a always,exit -F exe=/usr/bin/dockerd -k docker
--a always,exit -F exe=/usr/bin/docker -k docker
--a always,exit -F exe=/usr/bin/docker-containerd -k docker
--a always,exit -F exe=/usr/bin/docker-runc -k docker
--a always,exit -F exe=/var/lib/docker -k docker
--a always,exit -F exe=/etc/docker -k docker
--a always,exit -F exe=/etc/sysconfig/docker -k docker
--a always,exit -F exe=/etc/sysconfig/docker-storage -k docker
--a always,exit -F exe=/usr/lib/systemd/system/docker.service -k docker
+-w /usr/bin/dockerd -k docker
+-w /usr/bin/docker -k docker
+-w /usr/bin/docker-containerd -k docker
+-w /usr/bin/docker-runc -k docker
+-w /var/lib/docker -k docker
+-w /etc/docker -k docker
+-w /etc/sysconfig/docker -k docker
+-w /etc/sysconfig/docker-storage -k docker
+-w /usr/lib/systemd/system/docker.service -k docker
 
 ### Kubelet
--a always,exit -F exe=/usr/bin/kubelet -k kubelet
+-w /usr/bin/kubelet -k kubelet
 
 # High volume events ----------------------------------------------------------
 
