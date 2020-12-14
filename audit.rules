@@ -235,16 +235,6 @@
 ## SELinux events that modify the system's Mandatory Access Controls (MAC)
 -w /etc/selinux/ -p wa -k mac_policy
 
-## Critical elements access failures
--a always,exit -F arch=b64 -S open -F dir=/etc -F success=0 -F auid>=1000 -F auid!=-1 -k unauthedfileaccess_etc
--a always,exit -F arch=b64 -S open -F dir=/bin -F success=0 -F auid>=1000 -F auid!=-1 -k unauthedfileaccess_bin
--a always,exit -F arch=b64 -S open -F dir=/sbin -F success=0 -F auid>=1000 -F auid!=-1 -k unauthedfileaccess_sbin
--a always,exit -F arch=b64 -S open -F dir=/usr/bin -F success=0 -F auid>=1000 -F auid!=-1 -k unauthedfileaccess_usr_bin
--a always,exit -F arch=b64 -S open -F dir=/usr/sbin -F success=0 -F auid>=1000 -F auid!=-1 -k unauthedfileaccess_usr_sbin
--a always,exit -F arch=b64 -S open -F dir=/var -F success=0 -F auid>=1000 -F auid!=-1 -k unauthedfileaccess_var
--a always,exit -F arch=b64 -S open -F dir=/home -F success=0 -F auid>=1000 -F auid!=-1 -k unauthedfileaccess_home
--a always,exit -F arch=b64 -S open -F dir=/srv -F success=0 -F auid>=1000 -F auid!=-1 -k unauthedfileaccess_srv
-
 ## Process ID change (switching accounts) applications
 -w /bin/su -p x -k priv_esc
 -w /usr/bin/sudo -p x -k priv_esc
