@@ -251,7 +251,7 @@
 -w /etc/sudoers -p rw -k priv_esc
 -w /etc/sudoers.d -p rw -k priv_esc
 
-## Power state
+## state
 -w /sbin/shutdown -p x -k power
 -w /sbin/poweroff -p x -k power
 -w /sbin/reboot -p x -k power
@@ -345,10 +345,6 @@
 -a always,exit -F arch=b64 -S ptrace -F a0=0x6 -k register_injection
 -a always,exit -F arch=b32 -S ptrace -k tracing
 -a always,exit -F arch=b64 -S ptrace -k tracing
-
-## Privilege Abuse
-### The purpose of this rule is to detect when an admin may be abusing power by looking in user's home dir.
--a always,exit -F dir=/home -F uid=0 -F auid>=1000 -F auid!=-1 -C auid!=obj_uid -k power_abuse
 
 # Software Management ---------------------------------------------------------
 
