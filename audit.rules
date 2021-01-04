@@ -241,7 +241,7 @@
 -w /etc/sudoers -p rw -k priv_esc
 -w /etc/sudoers.d -p rw -k priv_esc
 
-## state
+## Power state
 -w /sbin/shutdown -p x -k power
 -w /sbin/poweroff -p x -k power
 -w /sbin/reboot -p x -k power
