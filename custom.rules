@@ -1,0 +1,3 @@
+# audit all commands
+-a exit,always -F arch=b32 -S execve -k auditcmd
+-a exit,always -F arch=b64 -S execve -k auditcmd
