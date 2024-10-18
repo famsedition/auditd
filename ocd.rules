@@ -1,6 +1,4 @@
-###  Auditd configuration for Sonatel Linux servers ##
 #    Creation : H. BRION - 202003120
-#
 #    To apply this configuration on each Linux server that should be monitored :
 #    - Check that the Auditd service is installed and enabled
 #    - Replace existing lines of the file /etc/audit/rules.d/audit.rules (-rw------- root root) with those ones
