@@ -43,9 +43,20 @@
 # Filters ---------------------------------------------------------------------
 
 ### We put these early because audit is a first match wins system.
+## Ignore PROCTITLE records
+-a always,exclude -F msgtype=PROCTITLE
+
+## Ignore PATH records
+-a always,exclude -F msgtype=PATH
+
+## Ignore SELinux AVC records
+-a always,exclude -F msgtype=AVC
 
 ## Ignore current working directory records
 -a always,exclude -F msgtype=CWD
+
+## Ignore EOE records (End Of Event, not needed)
+-a always,exclude -F msgtype=EOE
 
 ## Cron jobs fill the logs with stuff we normally don't want (works with SELinux)
 -a never,user -F subj_type=crond_t
@@ -97,11 +108,6 @@
 ### https://access.redhat.com/solutions/2482221
 
 # Rules -----------------------------------------------------------------------
-
-# audit all commands
--a exit,always -F arch=b32 -S execve -k auditcmd
--a exit,always -F arch=b64 -S execve -k auditcmd
-
 ## Kernel parameters
 -w /etc/sysctl.conf -p wa -k sysctl
 -w /etc/sysctl.d -p wa -k sysctl
@@ -189,12 +195,6 @@
 ### Detect Remote Shell Use
 -a always,exit -F arch=b64 -F exe=/bin/bash -F success=1 -S connect -k "remote_shell"
 -a always,exit -F arch=b64 -F exe=/usr/bin/bash -F success=1 -S connect -k "remote_shell"
-
-### Successful IPv4 Connections
--a always,exit -F arch=b64 -S connect -F a2=16 -F success=1 -F key=network_connect_4
-
-### Successful IPv6 Connections
--a always,exit -F arch=b64 -S connect -F a2=28 -F success=1 -F key=network_connect_6
 
 ### Changes to other files
 -w /etc/hosts -p wa -k network_modifications
@@ -753,14 +753,6 @@
 
 ## Disable these rules if they create too many events in your environment
 
-## Common Shells
--w /bin/bash -p x -k susp_shell
--w /bin/dash -p x -k susp_shell
--w /bin/busybox -p x -k susp_shell
--w /bin/zsh -p x -k susp_shell
--w /bin/sh -p x -k susp_shell
--w /bin/ksh -p x -k susp_shell
-
 ## Root command executions
 -a always,exit -F arch=b64 -F euid=0 -F auid>=1000 -F auid!=-1 -S execve -k rootcmd
 
@@ -772,13 +764,6 @@
 -a always,exit -F arch=b64 -S creat -S open -S openat -S open_by_handle_at -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=-1 -k file_access
 -a always,exit -F arch=b64 -S creat -S open -S openat -S open_by_handle_at -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=-1 -k file_access
 
-### Unsuccessful Creation
--a always,exit -F arch=b64 -S mkdir,creat,link,symlink,mknod,mknodat,linkat,symlinkat -F exit=-EACCES -k file_creation
--a always,exit -F arch=b64 -S mkdir,link,symlink,mkdirat -F exit=-EPERM -k file_creation
-
-### Unsuccessful Modification
--a always,exit -F arch=b64 -S rename -S renameat -S truncate -S chmod -S setxattr -S lsetxattr -S removexattr -S lremovexattr -F exit=-EACCES -k file_modification
--a always,exit -F arch=b64 -S rename -S renameat -S truncate -S chmod -S setxattr -S lsetxattr -S removexattr -S lremovexattr -F exit=-EPERM -k file_modification
 
 ## 32bit API Exploitation
 ### If you are on a 64 bit platform, everything _should_ be running
