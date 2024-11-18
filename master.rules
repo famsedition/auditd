@@ -96,17 +96,6 @@
 -a always,exit -F arch=b64 -F dir=/usr/share/filebeat/bin/ -F perm=x -F key=filebeat
 -a always,exit -F arch=b32 -F dir=/usr/share/filebeat/bin/ -F perm=x -F key=filebeat
 
-### macOS
-#### https://www.elastic.co/guide/en/beats/filebeat/7.17/directory-layout.html
--a always,exit -F arch=b32 -F path=/usr/local/var/homebrew/linked/filebeat-full -F perm=x -F key=filebeat
--a always,exit -F arch=b64 -F path=/usr/local/var/homebrew/linked/filebeat-full -F perm=x -F key=filebeat
-
--a always,exit -F arch=b32 -F dir=/usr/local/var/homebrew/linked/filebeat-full/bin/ -F perm=x -F key=filebeat 
--a always,exit -F arch=b64 -F dir=/usr/local/var/homebrew/linked/filebeat-full/bin/ -F perm=x -F key=filebeat
-
--a always,exit -F arch=b32 -F dir=/usr/local/etc/filebeat/ -F perm=wa -F key=filebeat  
--a always,exit -F arch=b64 -F dir=/usr/local/etc/filebeat/ -F perm=wa -F key=filebeat
-
 ## More information on how to filter events
 ### https://access.redhat.com/solutions/2482221
 
@@ -426,10 +415,6 @@
 -a always,exit -F arch=b32 -F path=/usr/sbin/gzexe -F perm=x -F key=Data_Compressed
 -a always,exit -F arch=b64 -F path=/usr/sbin/gzexe -F perm=x -F key=Data_Compressed
 
-### macOS
-
--a always,exit -F arch=b32 -F path=/usr/local/bin/gzexe -F perm=x -F key=Data_Compressed
--a always,exit -F arch=b64 -F path=/usr/local/bin/gzexe -F perm=x -F key=Data_Compressed
 
 ### https://www.rkeene.org/oss/dact
 -a always,exit -F arch=b32 -F path=/usr/bin/dact -F perm=x -F key=Data_Compressed
@@ -499,7 +484,7 @@
 
 # Web Server Activity
 ## Change the number "33" to the ID of your WebServer user. Default: www-data:x:33:33
--a always,exit -F arch=b64 -S execve -F euid=33 -k detect_execve_www
+-a always,exit -F arch=b64 -S execve -F uid=apache -k detect_execve_www
 
 ### https://clustershell.readthedocs.io/
 -w /bin/clush -p x -k susp_shell
@@ -616,10 +601,6 @@
 ## GDS specific secrets
 -w /etc/puppet/ssl -p wa -k puppet_ssl
 
-## IBM Bigfix BESClient
--a always,exit -F arch=b64 -S open -F dir=/opt/BESClient -F success=0 -k soft_besclient
--w /var/opt/BESClient/ -p wa -k soft_besclient
-
 ## CHEF https://www.chef.io/chef/
 -w /etc/chef -p wa -k soft_chef
 
@@ -669,38 +650,6 @@
 -w /usr/local/bin/ack -p x -k string_search
 -w /usr/bin/semgrep -p x -k string_search
 
-# CrowdStrike Falcon
-# Identify CrowdStrike Falcon Sensor updates
--a always,exit -F arch=b32 -F path=/etc/crowdstrike/falcon-sensor.conf -p wa -F key=falcon_sensor_update
--a always,exit -F arch=b64 -F path=/etc/crowdstrike/falcon-sensor.conf -p wa -F key=falcon_sensor_update
-
--a always,exit -F arch=b32 -F path=/usr/lib/crowdstrike/falcon-sensor.conf -p wa -F key=falcon_sensor_update
--a always,exit -F arch=b64 -F path=/usr/lib/crowdstrike/falcon-sensor.conf -p wa -F key=falcon_sensor_update
-
-# Identify CrowdStrike Falcon Sensor
--a always,exit -F arch=b32 -F dir=/etc/crowdstrike/ -p wa -F key=falcon_sensor
--a always,exit -F arch=b64 -F dir=/etc/crowdstrike/ -p wa -F key=falcon_sensor
-
--a always,exit -F arch=b32 -F dir=/usr/lib/crowdstrike/ -p wa -F key=falcon_sensor
--a always,exit -F arch=b64 -F dir=/usr/lib/crowdstrike/ -p wa -F key=falcon_sensor
-
--a always,exit -F arch=b32 -F dir=/opt/CrowdStrike/ -p wa -F key=falcon_sensor
--a always,exit -F arch=b64 -F dir=/opt/CrowdStrike/ -p wa -F key=falcon_sensor
-
--a always,exit -F arch=b32 -F dir=/var/log/crowdstrike/ -p wa -F key=falcon_sensor
--a always,exit -F arch=b64 -F dir=/var/log/crowdstrike/ -p wa -F key=falcon_sensor
-
-# Identify CrowdStrike Falcon Agent activity
--a always,exit -F arch=b32 -F path=/usr/bin/falcon-scout -p x -F key=falcon_agent
--a always,exit -F arch=b64 -F path=/usr/bin/falcon-scout -p x -F key=falcon_agent
-
--a always,exit -F arch=b32 -F path=/usr/bin/falcon-agent -p x -F key=falcon_agent
--a always,exit -F arch=b64 -F path=/usr/bin/falcon-agent -p x -F key=falcon_agent
-
-# Identify CrowdStrike Falcon Sensor network
--a always,exit -F arch=b32 -S connect -F dir=+ -F obj=/opt/CrowdStrike/falcon-sensor -F key=crowdstrike_network
--a always,exit -F arch=b64 -S connect -F dir=+ -F obj=/opt/CrowdStrike/falcon-sensor -F key=crowdstrike_network
-
 ## Docker
 -w /usr/bin/dockerd -k docker
 -w /usr/bin/docker -k docker
@@ -721,9 +670,6 @@
 -w /usr/bin/virtualbox -p x -k virtualbox
 -w /usr/bin/virt-manager -p x -k virt-manager
 -w /usr/bin/VBoxManage -p x -k VBoxManage
-
-## Kubelet
--w /usr/bin/kubelet -k kubelet
 
 # ipc system call
 # /usr/include/linux/ipc.h
