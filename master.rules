@@ -43,6 +43,9 @@
 # Filters ---------------------------------------------------------------------
 
 ### We put these early because audit is a first match wins system.
+## Ignore IPC records
+-a always,exclude -F msgtype=IPC
+
 ## Ignore PROCTITLE records
 -a always,exclude -F msgtype=PROCTITLE
 
@@ -724,8 +727,8 @@
 ## msgget
 #-a always,exit -S ipc -F a0=13 -k Inter-Process_Communication
 ## Use these lines on x86_64, ia64 instead
--a always,exit -F arch=b64 -S msgctl -k Inter-Process_Communication
--a always,exit -F arch=b64 -S msgget -k Inter-Process_Communication
+#-a always,exit -F arch=b64 -S msgctl -k Inter-Process_Communication
+#-a always,exit -F arch=b64 -S msgget -k Inter-Process_Communication
 
 ## semctl
 #-a always,exit -S ipc -F a0=3 -k Inter-Process_Communication
@@ -736,18 +739,18 @@
 ## semtimedop
 #-a always,exit -S ipc -F a0=4 -k Inter-Process_Communication
 ## Use these lines on x86_64, ia64 instead
--a always,exit -F arch=b64 -S semctl -k Inter-Process_Communication
--a always,exit -F arch=b64 -S semget -k Inter-Process_Communication
--a always,exit -F arch=b64 -S semop -k Inter-Process_Communication
--a always,exit -F arch=b64 -S semtimedop -k Inter-Process_Communication
+#-a always,exit -F arch=b64 -S semctl -k Inter-Process_Communication
+#-a always,exit -F arch=b64 -S semget -k Inter-Process_Communication
+#-a always,exit -F arch=b64 -S semop -k Inter-Process_Communication
+#-a always,exit -F arch=b64 -S semtimedop -k Inter-Process_Communication
 
 ## shmctl
 #-a always,exit -S ipc -F a0=24 -k Inter-Process_Communication
 ## shmget
 #-a always,exit -S ipc -F a0=23 -k Inter-Process_Communication
 ## Use these lines on x86_64, ia64 instead
--a always,exit -F arch=b64 -S shmctl -k Inter-Process_Communication
--a always,exit -F arch=b64 -S shmget -k Inter-Process_Communication
+#-a always,exit -F arch=b64 -S shmctl -k Inter-Process_Communication
+#-a always,exit -F arch=b64 -S shmget -k Inter-Process_Communication
 
 # High Volume Events ----------------------------------------------------------
 
@@ -770,7 +773,8 @@
 ### in 64 bit mode. This rule will detect any use of the 32 bit syscalls
 ### because this might be a sign of someone exploiting a hole in the 32
 ### bit API.
--a always,exit -F arch=b32 -S all -k 32bit_api
+### ignorer appels API 32bit de McAfee : comm="macompatsvc" comm="Mue_InUse"
+-a always,exit -F arch=b32 -S all -F comm!=macompatsvc -F comm!=Mue_InUse -k 32bit_api
 
 # Make The Configuration Immutable --------------------------------------------
 
